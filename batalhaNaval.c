@@ -1,15 +1,28 @@
 #include <stdio.h>
 
-// Constantes para configuração do tabuleiro e navios
-#define TAM_TABULEIRO 10     // Tamanho do tabuleiro (10x10)
-#define TAM_NAVIO 3          // Tamanho fixo dos navios (todos de tamanho 3)
-#define NAVIO 3              // Valor para representar o navio no tabuleiro
+// -------------------- Constantes ----------------------
+#define TAM_TABULEIRO 10    // Tabuleiro 10x10
+#define TAM_NAVIO 3         // Navios sempre tamanho 3
+#define NAVIO 3             // Valor de navio
+#define HABILIDADE 5        // Valor para área de efeito
+#define TAM_HABILIDADE 5    // Matrizes de habilidade 5x5
 
-/******************************************************************************/
-/* Função para verificar se um navio reto (horizontal ou vertical) cabe       */
-/* dentro dos limites do tabuleiro                                            */
-/* horizontal = 1 para navio horizontal; horizontal = 0 para navio vertical   */
-/******************************************************************************/
+// ----------------- Protótipos das Funções -----------------
+int valida_posicao_reta(int linha, int coluna, int tamanho, int horizontal);
+int valida_posicao_diagonal(int linha, int coluna, int tamanho, int diagonalPrincipal);
+int verifica_sobreposicao_reta(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int horizontal);
+int verifica_sobreposicao_diagonal(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int diagonalPrincipal);
+void posiciona_navio_reta(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int horizontal);
+void posiciona_navio_diagonal(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int diagonalPrincipal);
+void imprime_tabuleiro_visual(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO]);
+void cria_habilidade_cone(int habilidade[TAM_HABILIDADE][TAM_HABILIDADE]);
+void cria_habilidade_cruz(int habilidade[TAM_HABILIDADE][TAM_HABILIDADE]);
+void cria_habilidade_octaedro(int habilidade[TAM_HABILIDADE][TAM_HABILIDADE]);
+void sobrepoe_habilidade(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int habilidade[TAM_HABILIDADE][TAM_HABILIDADE], int origemLinha, int origemColuna);
+
+// ---------------- Implementação das Funções ----------------
+
+// Valida posicionamento de navio reto
 int valida_posicao_reta(int linha, int coluna, int tamanho, int horizontal) {
     if (horizontal)
         return (coluna >= 0 && coluna + tamanho - 1 < TAM_TABULEIRO && linha >= 0 && linha < TAM_TABULEIRO);
@@ -17,10 +30,7 @@ int valida_posicao_reta(int linha, int coluna, int tamanho, int horizontal) {
         return (linha >= 0 && linha + tamanho - 1 < TAM_TABULEIRO && coluna >= 0 && coluna < TAM_TABULEIRO);
 }
 
-/******************************************************************************/
-/* Função para verificar se um navio diagonal cabe dentro do tabuleiro        */
-/* diagonalPrincipal = 1: diagonal ↘ (principal), diagonalPrincipal = 0: ↙    */
-/******************************************************************************/
+// Valida posicionamento de navio diagonal
 int valida_posicao_diagonal(int linha, int coluna, int tamanho, int diagonalPrincipal) {
     if (diagonalPrincipal)
         return (linha >= 0 && linha + tamanho - 1 < TAM_TABULEIRO &&
@@ -30,10 +40,7 @@ int valida_posicao_diagonal(int linha, int coluna, int tamanho, int diagonalPrin
                 coluna - (tamanho - 1) >= 0 && coluna < TAM_TABULEIRO);
 }
 
-/******************************************************************************/
-/* Função para verificar sobreposição em navio reto (horizontal/vertical)     */
-/* Retorna 1 se NÃO houver sobreposição, 0 caso contrário                     */
-/******************************************************************************/
+// Verifica sobreposição de navio reto
 int verifica_sobreposicao_reta(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int horizontal) {
     for (int i = 0; i < tamanho; i++) {
         int l = linha + (horizontal ? 0 : i);
@@ -41,12 +48,10 @@ int verifica_sobreposicao_reta(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int 
         if (tabuleiro[l][c] == NAVIO)
             return 0;
     }
-    return 1; // livre
+    return 1;
 }
 
-/******************************************************************************/
-/* Função para verificar sobreposição em navio diagonal                       */
-/******************************************************************************/
+// Verifica sobreposição de navio diagonal
 int verifica_sobreposicao_diagonal(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int diagonalPrincipal) {
     for (int i = 0; i < tamanho; i++) {
         int l = linha + i;
@@ -54,12 +59,10 @@ int verifica_sobreposicao_diagonal(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], 
         if (tabuleiro[l][c] == NAVIO)
             return 0;
     }
-    return 1; // livre
+    return 1;
 }
 
-/******************************************************************************/
-/* Função para posicionar navio reto (horizontal/vertical)                    */
-/******************************************************************************/
+// Posiciona navio reto
 void posiciona_navio_reta(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int horizontal) {
     for (int i = 0; i < tamanho; i++) {
         int l = linha + (horizontal ? 0 : i);
@@ -68,9 +71,7 @@ void posiciona_navio_reta(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha
     }
 }
 
-/******************************************************************************/
-/* Função para posicionar navio diagonal                                      */
-/******************************************************************************/
+// Posiciona navio diagonal
 void posiciona_navio_diagonal(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int linha, int coluna, int tamanho, int diagonalPrincipal) {
     for (int i = 0; i < tamanho; i++) {
         int l = linha + i;
@@ -79,80 +80,141 @@ void posiciona_navio_diagonal(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int l
     }
 }
 
-/******************************************************************************/
-/* Função para imprimir o tabuleiro no console, com alinhamento               */
-/******************************************************************************/
-void imprime_tabuleiro(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO]) {
-    printf("    "); // Espaço para alinhamento dos números de coluna
+// Cria matriz cone (cone apontando para baixo)
+void cria_habilidade_cone(int habilidade[TAM_HABILIDADE][TAM_HABILIDADE]) {
+    int centro = TAM_HABILIDADE / 2;
+    for (int linha = 0; linha < TAM_HABILIDADE; linha++) {
+        for (int coluna = 0; coluna < TAM_HABILIDADE; coluna++) {
+            habilidade[linha][coluna] = 0;
+            int minimo = centro - linha;
+            int maximo = centro + linha;
+            if (linha >= 0 && minimo <= coluna && coluna <= maximo && coluna >= 0 && coluna < TAM_HABILIDADE)
+                habilidade[linha][coluna] = 1;
+        }
+    }
+}
+
+// Cria matriz cruz
+void cria_habilidade_cruz(int habilidade[TAM_HABILIDADE][TAM_HABILIDADE]) {
+    int centro = TAM_HABILIDADE / 2;
+    for (int linha = 0; linha < TAM_HABILIDADE; linha++)
+        for (int coluna = 0; coluna < TAM_HABILIDADE; coluna++)
+            habilidade[linha][coluna] = (linha == centro || coluna == centro) ? 1 : 0;
+}
+
+// Cria matriz octaedro (losango)
+void cria_habilidade_octaedro(int habilidade[TAM_HABILIDADE][TAM_HABILIDADE]) {
+    int centro = TAM_HABILIDADE / 2;
+    for (int linha = 0; linha < TAM_HABILIDADE; linha++) {
+        for (int coluna = 0; coluna < TAM_HABILIDADE; coluna++) {
+            int dist = (linha > centro ? linha - centro : centro - linha) + (coluna > centro ? coluna - centro : centro - coluna);
+            habilidade[linha][coluna] = (dist <= 2) ? 1 : 0;
+        }
+    }
+}
+
+// Sobrepõe uma matriz de habilidade ao tabuleiro
+void sobrepoe_habilidade(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO], int habilidade[TAM_HABILIDADE][TAM_HABILIDADE], int origemLinha, int origemColuna) {
+    int meio = TAM_HABILIDADE / 2;
+    for (int i = 0; i < TAM_HABILIDADE; i++) {
+        for (int j = 0; j < TAM_HABILIDADE; j++) {
+            if (habilidade[i][j] == 1) {
+                int linha_tab = origemLinha - meio + i;
+                int col_tab = origemColuna - meio + j;
+                if (linha_tab >= 0 && linha_tab < TAM_TABULEIRO && col_tab >= 0 && col_tab < TAM_TABULEIRO) {
+                    if (tabuleiro[linha_tab][col_tab] != NAVIO) // Não sobrescreve navio
+                        tabuleiro[linha_tab][col_tab] = HABILIDADE;
+                }
+            }
+        }
+    }
+}
+
+// Imprime tabuleiro visualmente
+void imprime_tabuleiro_visual(int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO]) {
+    printf("    ");
     for (int c = 0; c < TAM_TABULEIRO; c++)
         printf("%2d ", c);
     printf("\n");
     for (int l = 0; l < TAM_TABULEIRO; l++) {
         printf("%2d |", l);
         for (int c = 0; c < TAM_TABULEIRO; c++) {
-            printf(" %d ", tabuleiro[l][c]);
+            if (tabuleiro[l][c] == 0)
+                printf(" ~ "); // água
+            else if (tabuleiro[l][c] == NAVIO)
+                printf(" N "); // navio
+            else if (tabuleiro[l][c] == HABILIDADE)
+                printf(" * "); // área habilidade
+            else
+                printf(" ? "); // valor inesperado
         }
         printf("\n");
     }
 }
 
+// ---------------- Função principal -----------------
 int main() {
-    // 1. Inicializa o tabuleiro com água (0 em todas as posições)
-    int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO] = {{0}};
+    // Inicializa tabuleiro
+    int tabuleiro[TAM_TABULEIRO][TAM_TABULEIRO];
+    for (int i = 0; i < TAM_TABULEIRO; i++)
+        for (int j = 0; j < TAM_TABULEIRO; j++)
+            tabuleiro[i][j] = 0;
 
-    // 2. Coordenadas iniciais dos navios definidas no código
-    // (Escolha posições que não causem sobreposição!)
-    int linha_h = 2, coluna_h = 3;                // Navio horizontal inicia em (2,3)
-    int linha_v = 5, coluna_v = 7;                // Navio vertical inicia em (5,7)
-    int linha_diag_principal = 0, coluna_diag_principal = 0;       // Diagonal ↘ começa em (0,0)
-    int linha_diag_secundaria = 0, coluna_diag_secundaria = 9;     // Diagonal ↙ começa em (0,9)
+    // Posiciona navios
+    int linha_h = 2, coluna_h = 3;
+    int linha_v = 5, coluna_v = 7;
+    int linha_diag_principal = 0, coluna_diag_principal = 0;
+    int linha_diag_secundaria = 0, coluna_diag_secundaria = 9;
 
-    // 3. Validação dos navios antes de posicionar
-    if (!valida_posicao_reta(linha_h, coluna_h, TAM_NAVIO, 1)) {
-        printf("ERRO: Navio horizontal inválido.\n");
-        return 1;
-    }
-    if (!valida_posicao_reta(linha_v, coluna_v, TAM_NAVIO, 0)) {
-        printf("ERRO: Navio vertical inválido.\n");
-        return 1;
-    }
-    if (!valida_posicao_diagonal(linha_diag_principal, coluna_diag_principal, TAM_NAVIO, 1)) {
-        printf("ERRO: Navio diagonal principal inválido.\n");
-        return 1;
-    }
-    if (!valida_posicao_diagonal(linha_diag_secundaria, coluna_diag_secundaria, TAM_NAVIO, 0)) {
-        printf("ERRO: Navio diagonal secundária inválido.\n");
-        return 1;
-    }
-
-    // 4. Verificação de sobreposição e posicionamento dos navios (ordem importa!)
-    if (!verifica_sobreposicao_reta(tabuleiro, linha_h, coluna_h, TAM_NAVIO, 1)) {
-        printf("ERRO: Sobreposição no navio horizontal.\n");
+    if (!valida_posicao_reta(linha_h, coluna_h, TAM_NAVIO, 1) ||
+        !verifica_sobreposicao_reta(tabuleiro, linha_h, coluna_h, TAM_NAVIO, 1)) {
+        printf("Erro navio horizontal\n");
         return 1;
     }
     posiciona_navio_reta(tabuleiro, linha_h, coluna_h, TAM_NAVIO, 1);
 
-    if (!verifica_sobreposicao_reta(tabuleiro, linha_v, coluna_v, TAM_NAVIO, 0)) {
-        printf("ERRO: Sobreposição no navio vertical.\n");
+    if (!valida_posicao_reta(linha_v, coluna_v, TAM_NAVIO, 0) ||
+        !verifica_sobreposicao_reta(tabuleiro, linha_v, coluna_v, TAM_NAVIO, 0)) {
+        printf("Erro navio vertical\n");
         return 1;
     }
     posiciona_navio_reta(tabuleiro, linha_v, coluna_v, TAM_NAVIO, 0);
 
-    if (!verifica_sobreposicao_diagonal(tabuleiro, linha_diag_principal, coluna_diag_principal, TAM_NAVIO, 1)) {
-        printf("ERRO: Sobreposição no navio diagonal principal.\n");
+    if (!valida_posicao_diagonal(linha_diag_principal, coluna_diag_principal, TAM_NAVIO, 1) ||
+        !verifica_sobreposicao_diagonal(tabuleiro, linha_diag_principal, coluna_diag_principal, TAM_NAVIO, 1)) {
+        printf("Erro navio diagonal principal\n");
         return 1;
     }
     posiciona_navio_diagonal(tabuleiro, linha_diag_principal, coluna_diag_principal, TAM_NAVIO, 1);
 
-    if (!verifica_sobreposicao_diagonal(tabuleiro, linha_diag_secundaria, coluna_diag_secundaria, TAM_NAVIO, 0)) {
-        printf("ERRO: Sobreposição no navio diagonal secundária.\n");
+    if (!valida_posicao_diagonal(linha_diag_secundaria, coluna_diag_secundaria, TAM_NAVIO, 0) ||
+        !verifica_sobreposicao_diagonal(tabuleiro, linha_diag_secundaria, coluna_diag_secundaria, TAM_NAVIO, 0)) {
+        printf("Erro navio diagonal secundária\n");
         return 1;
     }
     posiciona_navio_diagonal(tabuleiro, linha_diag_secundaria, coluna_diag_secundaria, TAM_NAVIO, 0);
 
-    // 5. Imprimir o tabuleiro final, mostrando água (0) e navios (3)
-    printf("\nTabuleiro final:\n\n");
-    imprime_tabuleiro(tabuleiro);
+    // Criação das matrizes de habilidade
+    int cone[TAM_HABILIDADE][TAM_HABILIDADE];
+    int cruz[TAM_HABILIDADE][TAM_HABILIDADE];
+    int octaedro[TAM_HABILIDADE][TAM_HABILIDADE];
 
+    cria_habilidade_cone(cone);
+    cria_habilidade_cruz(cruz);
+    cria_habilidade_octaedro(octaedro);
+
+    // Pontos de origem escolhidos
+    int origem_cone_l = 1, origem_cone_c = 1;         // canto superior-esquerdo
+    int origem_cruz_l = 7, origem_cruz_c = 7;         // canto inferior-direito
+    int origem_octaedro_l = 4, origem_octaedro_c = 4; // centro do tabuleiro
+
+    // Sobrepõe habilidades
+    sobrepoe_habilidade(tabuleiro, cone, origem_cone_l, origem_cone_c);
+    sobrepoe_habilidade(tabuleiro, cruz, origem_cruz_l, origem_cruz_c);
+    sobrepoe_habilidade(tabuleiro, octaedro, origem_octaedro_l, origem_octaedro_c);
+
+    // Exibe tabuleiro final
+    printf("\nTabuleiro final com navios e áreas das habilidades:\n\n");
+    imprime_tabuleiro_visual(tabuleiro);
     return 0;
 }
